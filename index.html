@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#264653">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='45' fill='%23264653'/%3E%3Ctext x='50' y='60' font-size='50' text-anchor='middle' fill='%23f4a261'%3E%C3%AE%3C/text%3E%3C/svg%3E">
+    <title>Italiano Mastery</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Lexend:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="app-container">
+        <header>
+            <h1>Italiano Mastery</h1>
+            <p class="tagline">Вчи італійську з комфортом</p>
+            <div class="stats-bar">
+                <div class="stat-item">🔥 Стрік: <span id="streak">0</span></div>
+                <div class="stat-item">⭐ XP: <span id="xp">0</span></div>
+            </div>
+        </header>
+
+        <main id="quiz-module">
+            <h2 class="module-title">Практика</h2>
+            <div class="practice-modes">
+                <button class="control-btn" onclick="switchPracticeMode('quiz')">Квіз</button>
+                <button class="control-btn" onclick="switchPracticeMode('correction')">Коректор</button>
+                <button class="control-btn" onclick="startFreeSentence()">Вільне речення</button>
+                <button class="control-btn" onclick="startFillBlanks()">Пропуски</button>
+            </div>
+            <div class="card" id="main-card">
+                <p id="word-display">Завантаження...</p>
+                <p id="word-pos" class="word-pos"></p>
+            </div>
+            <div id="correction-card" class="card" style="display: none;">
+                <p id="correction-text"></p>
+            </div>
+            <div id="floating-input" class="floating-input" style="display: none;">
+                <p>Виправте помилку:</p>
+                <input type="text" id="correction-input" />
+                <button class="control-btn" onclick="submitCorrection()">Підтвердити</button>
+            </div>
+            <div id="correction-result" style="display: none;">
+                <p id="before-after"></p>
+                <p id="explanation"></p>
+                <button class="control-btn" onclick="nextCorrection()">Наступна</button>
+            </div>
+            <div class="options-grid" id="options-container"></div>
+            <p id="feedback-text"></p>
+        </main>
+
+        <main id="cards-module" style="display: none;">
+            <div class="flash-header">
+                <div id="flash-category" class="category-tag">Категорія</div>
+                <div class="speaker-controls">
+                    <button class="speaker-btn" onclick="playClick(); speak(getDisplayWord(currentWord), false)">🔊</button>
+                    <button class="speaker-btn" onclick="playClick(); speak(getDisplayWord(currentWord), true)">🐢</button>
+                    <button class="speaker-btn" onclick="startSpeechRecognition()">🎤</button>
+                </div>
+            </div>
+            <div class="card flash-card" id="flash-card-element" onclick="playClick(); flipCard()">
+                <div class="card-content">
+                    <p id="flash-word">Слово</p>
+                    <small id="flash-hint">Натисни для перекладу</small>
+                </div>
+            </div>
+            <div class="card-controls">
+                <button class="control-btn unknown" onclick="finishCard(false)">Не знаю ❌</button>
+                <button class="control-btn known" onclick="finishCard(true)">Знаю ✅</button>
+            </div>
+            <div class="card-check">
+                <input type="text" id="flash-answer" placeholder="Пишіть переклад українською..." />
+                <button class="control-btn check" onclick="checkTranslation()">Перевірити переклад</button>
+            </div>
+            <p id="flash-feedback" class="flash-feedback"></p>
+        </main>
+
+        <main id="reading-module" style="display: none;">
+            <h2 class="module-title">Читання</h2>
+            <div id="reading-catalog" class="reading-catalog"></div>
+            <div id="reading-text" class="reading-text" style="display: none;"></div>
+        </main>
+
+        <main id="myvocab-module" style="display: none;">
+            <h2 class="module-title">Мій словник</h2>
+            <div class="myvocab-form">
+                <input type="text" id="myvocab-it" placeholder="Італійське слово" />
+                <input type="text" id="myvocab-ua" placeholder="Переклад українською" />
+                <button class="control-btn" onclick="addToMyVocab()">Додати слово</button>
+            </div>
+            <div id="myvocab-list" class="myvocab-list"></div>
+        </main>
+
+        <main id="media-module" style="display: none;">
+            <h2 class="module-title">Медіа-тека</h2>
+            <div id="media-catalog" class="media-catalog"></div>
+            <div id="media-player" class="media-player" style="display: none;">
+                <button class="control-btn" onclick="backToMediaCatalog()">Назад</button>
+                <audio id="audio-player" controls></audio>
+                <div class="summary-section" style="display: none;">
+                    <h3>Напишіть резюме італійською</h3>
+                    <textarea id="summary-text" placeholder="Введіть ваше резюме..."></textarea>
+                    <button class="control-btn" onclick="saveSummary()">Зберегти резюме</button>
+                </div>
+            </div>
+        </main>
+
+        <main id="profile-module" style="display: none;">
+            <h2 class="module-title">Особистий кабінет</h2>
+            <div class="profile-stats">
+                <div class="stat-item">⭐ XP: <span id="profile-xp">0</span></div>
+                <div class="stat-item">🔥 Стрік: <span id="profile-streak">0</span></div>
+            </div>
+            <div class="daily-goal">
+                <p>Щоденна мета: <span id="daily-progress">0/5</span> вправ</p>
+                <div class="progress-bar">
+                    <div id="progress-fill" class="progress-fill"></div>
+                </div>
+            </div>
+            <div class="profile-notes">
+                <h3>Мої нотатки</h3>
+                <div id="notes-list"></div>
+            </div>
+            <div class="settings">
+                <h3>Налаштування</h3>
+                <label>
+                    <input type="checkbox" id="sound-toggle" checked /> Звукові ефекти
+                </label>
+                <button class="control-btn danger" onclick="resetProgress()">Скинути прогрес</button>
+            </div>
+        </main>
+
+        <main id="path-section" style="display: none;">
+            <div id="path-container" class="path-container">
+                <!-- Chapters and levels will be generated here -->
+            </div>
+        </main>
+
+        <section id="theory-screen" class="learning-screen" style="display: none;">
+            <div class="learning-content">
+                <h2 id="theory-title">Граматика</h2>
+                <div id="theory-text" class="theory-text"></div>
+                <button class="control-btn" id="start-practice-btn">Почати вправи</button>
+                <button class="control-btn" onclick="closeTheory()">Повернутися</button>
+            </div>
+        </section>
+
+        <section id="learning-screen" class="learning-screen" style="display: none;">
+            <div class="learning-wrapper">
+                <div id="learning-progress" class="learning-progress"><div id="learning-progress-fill"></div></div>
+                <div id="learning-task" class="learning-task"></div>
+                <div id="learning-controls" class="learning-controls"></div>
+                <button class="control-btn skip-btn" id="skip-task-btn">Пропустити</button>
+            </div>
+        </section>
+
+        <div id="word-popup" class="word-popup" style="display: none;">
+            <div class="popup-content">
+                <h3 id="popup-word"></h3>
+                <p id="popup-translation"></p>
+                <p id="popup-definition"></p>
+                <p id="popup-example"></p>
+                <button class="control-btn" onclick="addToUserVocab()">Додати у словник</button>
+                <button class="control-btn" onclick="closePopup()">Закрити</button>
+            </div>
+        </div>
+
+        <nav class="bottom-nav">
+            <button class="nav-btn active" id="btn-quiz" onclick="switchMode('quiz')">Практика</button>
+            <button class="nav-btn" id="btn-reading" onclick="switchMode('reading')">Читання</button>
+            <button class="nav-btn" id="btn-media" onclick="switchMode('media')">Медіа</button>
+            <button class="nav-btn" id="btn-cards" onclick="switchMode('cards')">Картки</button>
+            <button class="nav-btn" id="btn-dict" onclick="switchMode('dict')">Словник</button>
+            <button class="nav-btn" id="btn-myvocab" onclick="switchMode('myvocab')">Мій словник</button>
+            <button class="nav-btn" id="btn-profile" onclick="switchMode('profile')">Профіль</button>
+            <button class="nav-btn" id="btn-path" onclick="switchMode('path')">Шлях</button>
+        </nav>
+    </div>
+
+    <script src="content.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
