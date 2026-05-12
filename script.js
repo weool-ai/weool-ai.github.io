@@ -26,10 +26,9 @@ const soundFx = {
 };
 
 function playSound(type) {
-    if (soundFx[type]) {
-        soundFx[type].currentTime = 0;
-        soundFx[type].play().catch(() => {});
-    }
+    if (!soundEnabled || !soundFx[type]) return;
+    soundFx[type].currentTime = 0;
+    soundFx[type].play().catch(() => {});
 }
 
 function playCorrect() { playSound('correct'); }
@@ -1259,14 +1258,6 @@ document.getElementById('sound-toggle').addEventListener('change', function() {
     localStorage.setItem('soundEnabled', soundEnabled);
 });
 
-// Оновити playSound для перевірки soundEnabled
-function playSound(type) {
-    if (soundEnabled && soundFx[type]) {
-        soundFx[type].currentTime = 0;
-        soundFx[type].play().catch(() => {});
-    }
-}
-
 // --- РОЗШИРЕННЯ ПРАКТИКИ ---
 function switchPracticeMode(mode) {
     currentMode = mode;
@@ -1302,7 +1293,17 @@ function startFillBlanks() {
     }
 }
 
-window.onload = () => {
+function showLoading() {
+    const overlay = document.getElementById('loading-overlay');
+    if (overlay) overlay.style.display = 'flex';
+}
+
+function hideLoading() {
+    const overlay = document.getElementById('loading-overlay');
+    if (overlay) overlay.style.display = 'none';
+}
+
+function initApp() {
     loadStats();
     loadProgress();
     nextQuestion();
@@ -1310,4 +1311,16 @@ window.onload = () => {
     renderDictionary();
     generatePath();
     document.getElementById('sound-toggle').checked = soundEnabled;
-};
+    hideLoading();
+}
+
+function waitForContentData() {
+    showLoading();
+    if (window.contentData && Object.keys(window.contentData).length) {
+        initApp();
+    } else {
+        setTimeout(waitForContentData, 50);
+    }
+}
+
+window.onload = waitForContentData;
